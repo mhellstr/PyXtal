@@ -206,7 +206,8 @@ class LAMMPSlib(Calculator):
             os.makedirs(self.folder)
         self.lammps_data = self.folder + "/data.lammps"
         self.lammps_in = self.folder + "/in.lammps"
-        with importlib.resources.as_file(importlib.resources.files("pyxtal") / "potentials") as path:
+        # with importlib.resources.as_file(importlib.resources.files("pyxtal") / "potentials") as path:
+        with importlib.resources.path("pyxtal", "potentials") as path:
             self.ffpath = str(path)
         self.lmpcmds = lmpcmds
         self.paras = []

@@ -25,7 +25,8 @@ lists = [
 for mol in lists:
     (smi, cif) = mol
     m = Chem.MolFromSmiles(smi)
-    with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+    # with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+    with importlib.resources.path("pyxtal.database", "cifs") as path:
         cif = str(path / cif)
     m2 = Chem.AddHs(m)
     m3 = Chem.AddHs(m2)

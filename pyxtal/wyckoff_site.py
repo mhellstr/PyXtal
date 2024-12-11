@@ -148,7 +148,7 @@ class atom_site:
 
         if not found:
             print("\nInput xyz", self.position)
-            print("Target operation", self.wp.ops[0].as_xyz_str())
+            print("Target operation", self.wp.ops[0].as_xyz_string())
             raise ValueError("Cannot generate the desried generator")
 
     def encode(self):

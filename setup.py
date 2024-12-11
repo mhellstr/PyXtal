@@ -2,6 +2,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import os
 
+
 class CustomInstallCommand(install):
     def run(self):
         # Check if the custom environment variable is set
@@ -9,6 +10,7 @@ class CustomInstallCommand(install):
             print("CustomInstallCommand: Installing Julia packages...")
             try:
                 from juliacall import Main as jl
+
                 jl.seval("using Pkg")
                 jl.seval('Pkg.add(Pkg.PackageSpec(name="CrystalNets", uuid="7952bbbe-a946-4118-bea0-081a0932faa9"))')
                 print("CrystalNets has been installed successfully.")
@@ -22,6 +24,7 @@ class CustomInstallCommand(install):
 
         # Run the standard install process
         install.run(self)
+
 
 with open("README.md") as fh:
     long_description = fh.read()
@@ -60,16 +63,15 @@ setup(
     ],
     setup_requires=["juliacall>=0.9.0"],
     install_requires=[
-        "spglib>=2.5.0",
-        "pymatgen>=2024.3.1",
-        "pandas>=2.0.2",
-        "networkx>=2.3",
-        "ase>=3.23.0",
-        "scipy>=1.7.3",
-        #"numpy>=1.26,<2",  # prevent the use of numpy2
-        "vasprun-xml>=1.0.4",  # prevent the use of numpy2
-        "importlib_metadata>=1.4",
-        "typing-extensions>=4.12",
+        "spglib",
+        "pymatgen",
+        "pandas",
+        "networkx",
+        "ase",
+        "scipy",
+        "numpy",  # prevent the use of numpy2
+        "importlib_metadata",
+        "typing-extensions",
         "pyocse>=0.1.1",
         "psutil",
     ],
@@ -80,9 +82,8 @@ setup(
         "test": ["wheel", "pytest", "coverage", "pytest-cov", "monty>=2024.2.26"],
     },
     cmdclass={
-        'install': CustomInstallCommand,
+        "install": CustomInstallCommand,
     },
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     license="MIT",
 )
-

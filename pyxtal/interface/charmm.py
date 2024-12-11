@@ -241,7 +241,7 @@ class CHARMM:
                 f"Crystal Build cutoff 14.0 noperations {len(site0.wp.ops) - 1:d}\n")
             for i, op in enumerate(site0.wp.ops):
                 if i > 0:
-                    f.write(f"({op.as_xyz_str():s})\n")
+                    f.write(f"({op.as_xyz_string():s})\n")
 
             f.write(
                 "image byres xcen ?xave ycen ?yave zcen ?zave sele resn LIG end\n")

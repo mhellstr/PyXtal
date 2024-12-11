@@ -34,14 +34,17 @@ from pyxtal.operations import (
     filtered_coords_euclidean,
 )
 
+
 def rf(package_name, resource_path):
-    package_path = importlib.util.find_spec(
-        package_name).submodule_search_locations[0]
+    package_path = importlib.util.find_spec(package_name).submodule_search_locations[0]
     return os.path.join(package_path, resource_path)
+
 
 """
 Properties for Lazy Loading
 """
+
+
 class SymmetryData:
 
     _k_subgroup = None
@@ -140,6 +143,7 @@ class SymmetryData:
         if self._hall_table is None:
             self._hall_table = read_csv(rf("pyxtal", "database/HM_Full.csv"), sep=",")
         return self._hall_table
+
 
 # ------------------------------ Constants ---------------------------------------
 SYMDATA = SymmetryData()
@@ -807,15 +811,13 @@ class Group:
         ]
 
         # A list of Wyckoff_positions sorted by descending multiplicity
-        #self.Wyckoff_positions = []
-        #for wpdict in wpdicts:
+        # self.Wyckoff_positions = []
+        # for wpdict in wpdicts:
         #    wp = Wyckoff_position.from_dict(wpdict)
         #    self.Wyckoff_positions.append(wp)
 
         # Use a generator to avoid keeping the full list of dicts in memory
-        self.Wyckoff_positions = [
-            Wyckoff_position.from_dict(wpdict) for wpdict in wpdicts_gen
-        ]
+        self.Wyckoff_positions = [Wyckoff_position.from_dict(wpdict) for wpdict in wpdicts_gen]
 
         # Organize wyckoffs by multiplicity
         self.wyckoffs_organized = organized_wyckoffs(self)
@@ -867,7 +869,7 @@ class Group:
         def extract_dof(site):
             site_letter = site[-1] if len(site) > 1 else site
             id = len(self) - letters.index(site_letter) - 1
-            xyz_str = self[id].ops[0].as_xyz_str()
+            xyz_str = self[id].ops[0].as_xyz_string()
             return len(set(re.sub(r"[^a-z]+", "", xyz_str)))
 
         return np.array([extract_dof(site) for site in sites])
@@ -1179,7 +1181,7 @@ class Group:
         Args:
             H (int): 1-230
         """
-        #if self.point_group == Group(H, quick=True).point_group:
+        # if self.point_group == Group(H, quick=True).point_group:
         if self.point_group == get_point_group(H):
             g_type = "k"
             dicts = self.get_max_k_subgroup()
@@ -1209,7 +1211,7 @@ class Group:
         Returns:
             list of valid transitions [(id, (['4a'], ['4b'], [['4a'], ['4c']])]
         """
-        if group_type == "t" :
+        if group_type == "t":
             dicts = self.get_max_t_subgroup()
         else:
             dicts = self.get_max_k_subgroup()
@@ -1265,10 +1267,8 @@ class Group:
                     wp_indices.append(j)
 
             wps = [wp_list[x] for x in wp_indices]
-            blocks = [np.array([relation[j].count(s) for s in _site])
-                      for j in wp_indices]
-            block_units = [sum([int(x[:-1]) * block[j]
-                               for j, x in enumerate(_site)]) for block in blocks]
+            blocks = [np.array([relation[j].count(s) for s in _site]) for j in wp_indices]
+            block_units = [sum([int(x[:-1]) * block[j] for j, x in enumerate(_site)]) for block in blocks]
 
             # below is a brute force search for the valid combinations
             combo_storage = [np.zeros(len(block_units))]
@@ -1293,8 +1293,7 @@ class Group:
                             for l, z in enumerate(trial):
                                 tester += z * blocks[l]
                             if np.all(tester == _site_counts):
-                                G_sites = [wp for wp, num in zip(
-                                    wps, trial) for _ in range(max(num, 1)) if num > 0]
+                                G_sites = [wp for wp, num in zip(wps, trial) for _ in range(max(num, 1)) if num > 0]
                                 if G_sites not in good_list:
                                     good_list.append(G_sites)
                 combo_storage = holder
@@ -1324,7 +1323,7 @@ class Group:
                     if sg > self.number:
                         subgroups = Group._get_max_t_subgroup(sg)
                 else:
-                    #g1 = Group(sg)
+                    # g1 = Group(sg)
                     if self.point_group == get_point_group(sg):
                         subgroups = Group._get_max_k_subgroup(sg)
                 if subgroups is not None:
@@ -1477,12 +1476,10 @@ class Group:
             # Get lists of multiplicity, maxn and freedom
             numIon = numIons[id]
             if valid_orientations is None:
-                l_mult, l_maxn, l_free, indices = self.get_lists(
-                    numIon, used_indices)
+                l_mult, l_maxn, l_free, indices = self.get_lists(numIon, used_indices)
             else:
                 vo = valid_orientations[id]
-                l_mult, l_maxn, l_free, indices = self.get_lists_mol(
-                    numIon, used_indices, vo)
+                l_mult, l_maxn, l_free, indices = self.get_lists_mol(numIon, used_indices, vo)
             # print(numIon, l_mult, indices, l_maxn, l_free)
 
             # Loop over possible combinations
@@ -1578,7 +1575,7 @@ class Group:
             groups = []
             subgroups = []
             for g in previous_layer_groups:
-                #subgroup_numbers = np.unique(Group(g, quick=True).get_max_subgroup_numbers())
+                # subgroup_numbers = np.unique(Group(g, quick=True).get_max_subgroup_numbers())
                 subgroup_numbers = np.unique(Group._get_max_subgroup_numbers(g))
 
                 # If a subgroup list has been found with H
@@ -1600,15 +1597,14 @@ class Group:
                 # Continue to generate next layer if the path to H has not been found.
                 else:
                     subgroups.append(subgroup_numbers)
-                    groups.extend(
-                        [x for x in subgroup_numbers if x not in groups and x not in traversed])
+                    groups.extend([x for x in subgroup_numbers if x not in groups and x not in traversed])
 
             traversed.extend(groups)
             layers[l] = {"groups": deepcopy(groups), "subgroups": []}
             layers[l - 1]["subgroups"] = deepcopy(subgroups)
         return final
 
-    #def path_to_subgroup(self, H):
+    # def path_to_subgroup(self, H):
     #    """
     #    For a given a path, extract the
     #        a list of (g_types, subgroup_id, spg_number, wp_list (optional))
@@ -1645,7 +1641,7 @@ class Group:
             path = paths[0]
             sg0 = path[0]
             pg0 = get_point_group(path[0])
-            #pg0 = Group(path[0], quick=True)
+            # pg0 = Group(path[0], quick=True)
             for p in path[1:]:
                 pg1 = get_point_group(p)
                 if pg0 == pg1:
@@ -1704,12 +1700,10 @@ class Group:
         for i in range(len(path[:-1])):
             g = path[i]
             h = path[i + 1]
-            options = set(k_subgroup[str(g)]["subgroup"] +
-                          t_subgroup[str(g)]["subgroup"])
+            options = set(k_subgroup[str(g)]["subgroup"] + t_subgroup[str(g)]["subgroup"])
             # print(g, h, options)
             for _g in options:
-                ls = k_subgroup[str(_g)]["subgroup"] + \
-                    t_subgroup[str(_g)]["subgroup"]
+                ls = k_subgroup[str(_g)]["subgroup"] + t_subgroup[str(_g)]["subgroup"]
                 if h in ls:
                     sol = deepcopy(path)
                     sol.insert(i + 1, _g)
@@ -1752,8 +1746,7 @@ class Group:
                             "t",
                             i,
                             tdict["subgroup"][i],
-                            functools.reduce(
-                                operator.iadd, [tdict["relations"][i][_index] for _index in _indexs], []),
+                            functools.reduce(operator.iadd, [tdict["relations"][i][_index] for _index in _indexs], []),
                         )
                     ]
                     for i in range(len_t)
@@ -1763,8 +1756,7 @@ class Group:
                             "k",
                             i,
                             kdict["subgroup"][i],
-                            functools.reduce(
-                                operator.iadd, [kdict["relations"][i][_index] for _index in _indexs], []),
+                            functools.reduce(operator.iadd, [kdict["relations"][i][_index] for _index in _indexs], []),
                         )
                     ]
                     for i in range(len_k)
@@ -1777,11 +1769,19 @@ class Group:
                 [
                     deepcopy(p)[1:]
                     for p in potential
-                    if (len(set(p[-1][3])) == 1 and p[-1][3][0][-1] == Wyckoff_position.from_group_and_index(p[-1][2], 0).letter)
+                    if (
+                        len(set(p[-1][3])) == 1
+                        and p[-1][3][0][-1] == Wyckoff_position.from_group_and_index(p[-1][2], 0).letter
+                    )
                 ]
             )
             potential = [
-                p for p in potential if not (len(set(p[-1][3])) == 1 and p[-1][3][0][-1] == Wyckoff_position.from_group_and_index(p[-1][2], 0).letter)
+                p
+                for p in potential
+                if not (
+                    len(set(p[-1][3])) == 1
+                    and p[-1][3][0][-1] == Wyckoff_position.from_group_and_index(p[-1][2], 0).letter
+                )
             ]
 
         return solutions
@@ -2008,11 +2008,9 @@ class Wyckoff_position:
         ops_all = get_wyckoffs(group, dim=dim)
         index = index_from_letter(letter, ops_all, dim=dim)
         if hn is not None:
-            wp = cls.from_group_and_index(
-                hn, index, dim, use_hall=True, wyckoffs=ops_all)
+            wp = cls.from_group_and_index(hn, index, dim, use_hall=True, wyckoffs=ops_all)
         else:
-            wp = cls.from_group_and_index(
-                group, index, dim, style=style, wyckoffs=ops_all)
+            wp = cls.from_group_and_index(group, index, dim, style=style, wyckoffs=ops_all)
         return wp
 
     @classmethod
@@ -2042,11 +2040,11 @@ class Wyckoff_position:
                     hall_number = pyxtal_hall_numbers[number - 1]
                 else:
                     hall_number = spglib_hall_numbers[number - 1]
-                    P =  abc2matrix(HALL_TABLE["P"][hall_number - 1])
+                    P = abc2matrix(HALL_TABLE["P"][hall_number - 1])
                     P1 = abc2matrix(HALL_TABLE["P^-1"][hall_number - 1])
             else:
                 hall_number = group
-                P =  abc2matrix(HALL_TABLE["P"][hall_number - 1])
+                P = abc2matrix(HALL_TABLE["P"][hall_number - 1])
                 P1 = abc2matrix(HALL_TABLE["P^-1"][hall_number - 1])
             directions = get_symmetry_directions(lattice_type, symbol[0])
 
@@ -2096,7 +2094,7 @@ class Wyckoff_position:
         _, spg_num = get_symmetry_from_ops(ops)
         wp = cls.from_group_and_index(spg_num, 0)
         if isinstance(ops[0], str):
-            ops = [SymmOp.from_xyz_str(op) for op in ops]
+            ops = [SymmOp.from_xyz_string(op) for op in ops]
         wp.ops = ops
         match_spg, match_hm = wp.update()
         # print("match_spg", match_spg, "match_hall", match_hm)
@@ -2117,7 +2115,7 @@ class Wyckoff_position:
 
         """
         if isinstance(ops[0], str):
-            ops = [SymmOp.from_xyz_str(op) for op in ops]
+            ops = [SymmOp.from_xyz_string(op) for op in ops]
 
         for wp in G:
             if wp.has_equivalent_ops(ops):
@@ -2127,7 +2125,7 @@ class Wyckoff_position:
             print(ops)
         else:
             for op in ops:
-                print(op.as_xyz_str())
+                print(op.as_xyz_string())
         raise RuntimeError("Cannot find the right wp")
 
     def from_index_quick(self, wyckoffs, index, P=None, P1=None):
@@ -2180,7 +2178,7 @@ class Wyckoff_position:
 
         if not supress:
             for op in self.ops:
-                s += "\n" + op.as_xyz_str()
+                s += "\n" + op.as_xyz_string()
 
         self.string = s
         return self.string
@@ -2240,7 +2238,7 @@ class Wyckoff_position:
                     rot = rot_Q.dot(op.rotation_matrix).dot(rot_P)
                     op0 = SymmOp.from_rotation_and_translation(rot, tran)
                     ops1.append(op0)
-                    # print(op0.as_xyz_str())
+                    # print(op0.as_xyz_string())
                 ops1 = trim_ops(ops1)
             else:
                 op0 = self.ops[0]
@@ -2278,7 +2276,7 @@ class Wyckoff_position:
         candidates = self.process_ops()
         success = False
         for hall_number in hall_numbers:
-            P =  abc2matrix(HALL_TABLE["P"][hall_number - 1])
+            P = abc2matrix(HALL_TABLE["P"][hall_number - 1])
             P1 = abc2matrix(HALL_TABLE["P^-1"][hall_number - 1])
             wyckoffs = get_wyckoffs(self.number, dim=self.dim)
 
@@ -2354,7 +2352,7 @@ class Wyckoff_position:
                 trans = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
 
         if 2 < self.number < 16:
-            #ops = Group(self.number)[self.index] if reset else self.ops
+            # ops = Group(self.number)[self.index] if reset else self.ops
             if reset:
                 ops = Wyckoff_position.from_group_and_index(self.number, self.index)
             else:
@@ -2378,16 +2376,16 @@ class Wyckoff_position:
         opss = [self.ops]
         if self.number in [5, 12] and self.index > 0:
             # replace y with y+1/2
-            op2 = SymmOp.from_xyz_str("x, y+1/2, z")
+            op2 = SymmOp.from_xyz_string("x, y+1/2, z")
             ops = [op2 * op for op in self.ops]
             opss.append(ops)
 
         if self.number in [13] and self.index > 0:
-            op2 = SymmOp.from_xyz_str("x, -y, z")
+            op2 = SymmOp.from_xyz_string("x, -y, z")
             ops = [op2 * op for op in self.ops]
             opss.append(ops)
 
-            # for op in ops: print('AAAA', op.as_xyz_str())
+            # for op in ops: print('AAAA', op.as_xyz_string())
         return opss
 
     def equivalent_set(self, index):
@@ -2414,7 +2412,7 @@ class Wyckoff_position:
         return [SymmOp.from_rotation_and_translation(op.rotation_matrix, [0, 0, 0]) for op in self.symmetry[0]]
 
     def get_site_symmetry_object(self, idx=0):
-        ops = self.get_site_symm_ops(idx)#; print(self.number, self.index, self.letter)
+        ops = self.get_site_symm_ops(idx)  # ; print(self.number, self.index, self.letter)
         return site_symmetry(ops, self.lattice_type, self.symbol[0])
 
     def get_site_symmetry(self, idx=0):
@@ -2488,8 +2486,7 @@ class Wyckoff_position:
             list of pymatgen SymmOp object
         """
         if idx >= len(self.symmetry):
-            raise ValueError(
-                f"Cannot pick {idx:d} in {len(self.symmetry):d} operations")
+            raise ValueError(f"Cannot pick {idx:d} in {len(self.symmetry):d} operations")
         ops = []
         for op in self.symmetry[idx]:
             hat = SymmOp.from_rotation_and_translation(hex_cell, [0, 0, 0])
@@ -2507,8 +2504,7 @@ class Wyckoff_position:
         for i, op in enumerate(self.ops):
             hat = SymmOp.from_rotation_and_translation(hex_cell, [0, 0, 0])
             op_tmp = hat * op * hat.inverse
-            ops[i] = op_tmp.from_rotation_and_translation(
-                op_tmp.rotation_matrix, op.translation_vector)
+            ops[i] = op_tmp.from_rotation_and_translation(op_tmp.rotation_matrix, op.translation_vector)
             # ops[i].translation_vector = op.translation_vector
 
         return ops
@@ -2546,10 +2542,7 @@ class Wyckoff_position:
         Returns:
             free xyz array
         """
-        if isinstance(random_state, Generator):
-            random_state = random_state.spawn(1)[0]
-        else:
-            random_state = np.random.default_rng(random_state)
+        random_state = np.random.default_rng(random_state)
 
         # print(self.apply_ops(pos)[0])
         res = self.apply_ops(pos)[0]
@@ -2676,9 +2669,8 @@ class Wyckoff_position:
             for id, ops in enumerate(Group(self.number)):
                 if len(ops) == len(self.ops):
                     for i, tran in enumerate(trans):
-                        op = op_translation(
-                            op_perm, tran) if i > 0 else op_perm
-                        # print(id, op.as_xyz_str(),tran)
+                        op = op_translation(op_perm, tran) if i > 0 else op_perm
+                        # print(id, op.as_xyz_string(),tran)
                         if are_equivalent_ops(op, ops[0]):
                             perm_id = id
                             return Group(self.number)[id], tran
@@ -2690,7 +2682,7 @@ class Wyckoff_position:
         if ops is None:
             ops = self.ops
         for op in ops:
-            print(op.as_xyz_str())
+            print(op.as_xyz_string())
 
     def gen_pos(self):
         """
@@ -2839,8 +2831,7 @@ class Wyckoff_position:
                 pts = []
                 for i in possible:
                     # wp = group[i]
-                    p, d = group[i].search_generator_dist(
-                        pt.copy(), lattice, group)
+                    p, d = group[i].search_generator_dist(pt.copy(), lattice, group)
                     distances.append(d)
                     pts.append(p)
 
@@ -2904,8 +2895,7 @@ class Wyckoff_position:
             pts = self.apply_ops(pt)
             distances = [distance(p0, lattice, PBC=self.PBC) for p0 in pts]
         else:  # sites like (x, 0, 0)
-            ops = group[0].ops if group is not None else get_wyckoffs(
-                self.number, dim=self.dim)[0]
+            ops = group[0].ops if group is not None else get_wyckoffs(self.number, dim=self.dim)[0]
             pts = []
             distances = []
             for op in ops:
@@ -2942,7 +2932,7 @@ class Wyckoff_position:
             diff = pos1 - pos0
             diff -= np.rint(diff)
             diff = np.abs(diff)
-            # print(self.letter, "{:24s}".format(op.as_xyz_str()), pos, pos0, pos1, diff)
+            # print(self.letter, "{:24s}".format(op.as_xyz_string()), pos, pos0, pos1, diff)
             if diff.sum() < tol:
                 pos1 -= np.floor(pos1)
                 match = True
@@ -3014,8 +3004,7 @@ class Wyckoff_position:
         # Must be different for hexcell
         if PBC is None:
             PBC = [1, 1, 1]
-        op = self.get_euclidean_generator(
-            cell, id) if self.euclidean else self.ops[id]
+        op = self.get_euclidean_generator(cell, id) if self.euclidean else self.ops[id]
 
         rot = op.rotation_matrix
         trans = op.translation_vector
@@ -3032,8 +3021,7 @@ class Wyckoff_position:
                 b = np.sqrt(basis_vector.dot(basis_vector))
                 # if not np.isclose(b, 0):
                 if b > 1e-3:
-                    new_vector += basis_vector * \
-                        (np.dot(point, basis_vector) / (b**2))
+                    new_vector += basis_vector * (np.dot(point, basis_vector) / (b**2))
             new_vector += trans
             return new_vector
 
@@ -3072,6 +3060,7 @@ class Wyckoff_position:
         z = binwidth * xyz[2]
         return [x, y, z]
 
+
 # ----------------- Wyckoff Position selection  --------------------------
 
 
@@ -3092,10 +3081,7 @@ def choose_wyckoff(G, number=None, site=None, dim=3, random_state: int | None | 
     Returns:
         Wyckoff position. If no position is found, returns False
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     if site is not None:
         number = G.number
@@ -3111,8 +3097,7 @@ def choose_wyckoff(G, number=None, site=None, dim=3, random_state: int | None | 
                     return wyckoff[random_state.choice(len(wyckoff))]
             return False
         else:
-            good_wyckoff = [w for wyckoff in wyckoffs_organized if len(
-                wyckoff[0]) <= number for w in wyckoff]
+            good_wyckoff = [w for wyckoff in wyckoffs_organized if len(wyckoff[0]) <= number for w in wyckoff]
 
             if len(good_wyckoff) > 0:
                 # NOTE good_wyckoff is a ragged list of lists
@@ -3151,10 +3136,7 @@ def choose_wyckoff_mol(
     Returns:
         Wyckoff position if found, False otherwise.
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     if site is not None:
         return Wyckoff_position.from_group_and_letter(G.number, site, dim, hn=G.hall_number)
@@ -3307,7 +3289,7 @@ def letter_from_index(index, group, dim=3):
     checko = False
     if type(group) == Group and group.dim == 0 or dim == 0:
         checko = True
-    if checko is True and len(group[-1]) == 1 and group[-1][0] == SymmOp.from_xyz_str("0,0,0"):
+    if checko is True and len(group[-1]) == 1 and group[-1][0] == SymmOp.from_xyz_string("0,0,0"):
         # o comes before a
         letters1 = "o" + letters
     length = len(group)
@@ -3331,7 +3313,7 @@ def index_from_letter(letter, group, dim=3):
     checko = False
     if isinstance(group, Group) and group.dim == 0 or dim == 0:
         checko = True
-    if checko is True and len(group[-1]) == 1 and group[-1][0] == SymmOp.from_xyz_str("0,0,0"):
+    if checko is True and len(group[-1]) == 1 and group[-1][0] == SymmOp.from_xyz_string("0,0,0"):
         # o comes before a
         letters1 = "o" + letters
     length = len(group)
@@ -3388,14 +3370,12 @@ class site_symmetry:
         hexagonal = lattice_type in ["hexagonal", "trigonal"]
 
         self.parse_trans = parse_trans
-        self.opas = [OperationAnalyzer(
-            op, parse_trans, hexagonal) for op in ops]
+        self.opas = [OperationAnalyzer(op, parse_trans, hexagonal) for op in ops]
         self.lattice_type = lattice_type
         self.directions = get_symmetry_directions(lattice_type, Bravis)
 
         if not parse_trans:
-            self.symbols = ["1", "-1", "2", "m",
-                            "3", "4", "-4", "-3", "6", "-6"]
+            self.symbols = ["1", "-1", "2", "m", "3", "4", "-4", "-3", "6", "-6"]
         else:
             self.symbols = [
                 "1",
@@ -3445,8 +3425,7 @@ class site_symmetry:
         Translation is alos counted here.
         """
 
-        matrix = np.zeros(
-            [len(all_sym_directions), len(self.symbols)], dtype=int)
+        matrix = np.zeros([len(all_sym_directions), len(self.symbols)], dtype=int)
         # every direction must has identity symmetry
         matrix[:, 0] = 1
         self.inversion = False
@@ -3477,8 +3456,7 @@ class site_symmetry:
 
                         sys.exit()
                 else:
-                    raise ValueError("Cannot parse the axis",
-                                     opa.axis, all_sym_directions)
+                    raise ValueError("Cannot parse the axis", opa.axis, all_sym_directions)
 
             if self.inversion:
                 matrix[:, 1] = 1  # if inversion is present
@@ -3525,8 +3503,7 @@ class site_symmetry:
                         elif opa.order == 6:
                             matrix[i, 8] = 1
                         else:
-                            raise RuntimeError(
-                                "Unexpected rotation order", opa.order)
+                            raise RuntimeError("Unexpected rotation order", opa.order)
                     elif opa.type == "rotoinversion":
                         if opa.rotation_order == 2:
                             matrix[i, 3] = 1  # -2 is m
@@ -3537,11 +3514,9 @@ class site_symmetry:
                         elif opa.rotation_order == 6:
                             matrix[i, 9] = 1
                         else:
-                            raise RuntimeError(
-                                "Unexpected rotinversion order", opa.order)
+                            raise RuntimeError("Unexpected rotinversion order", opa.order)
                 else:
-                    raise ValueError("Cannot parse the axis",
-                                     opa.axis, all_sym_directions)
+                    raise ValueError("Cannot parse the axis", opa.axis, all_sym_directions)
 
             if self.inversion:
                 matrix[:, 1] = 1  # if inversion is present
@@ -3562,18 +3537,15 @@ class site_symmetry:
         if self.lattice_type == "triclinic":
             skip = False
 
-        matrix = self.to_matrix_representation_spg(
-        ) if self.parse_trans else self.to_matrix_representation()
+        matrix = self.to_matrix_representation_spg() if self.parse_trans else self.to_matrix_representation()
 
         tables = []
         for i, axis in enumerate(all_sym_directions):
             direction_id = find_axis_order(axis, self.directions)
             if direction_id is not None:
-                num_symmetries = matrix[i, 2:].sum(
-                ) if skip else matrix[i].sum()
+                num_symmetries = matrix[i, 2:].sum() if skip else matrix[i].sum()
                 if num_symmetries > 0:
-                    strs = "{:4d} ({:2d} {:2d} {:2d}): ".format(
-                        direction_id, *axis)
+                    strs = "{:4d} ({:2d} {:2d} {:2d}): ".format(direction_id, *axis)
                     for sym in matrix[i]:
                         strs += f"{sym:4d} "
                     # strs += "{:4d}{:4d}{:4d}{:4d}{:4d}{:4d}{:4d}{:4d}{:4d}{:4d}".format(*matrix[i])
@@ -3840,7 +3812,7 @@ class site_symmetry:
             symbols = ["1", "-1", "2", "m", "3", "4", "-4", "-3", "6", "-6"]
             strs = [symbols[i] for i, x in enumerate(row) if x == 1]
             print(row)
-            #raise ValueError("Incompatible symmetry list", strs)
+            # raise ValueError("Incompatible symmetry list", strs)
         return ref_arrays[0][1], 0
 
 
@@ -3946,7 +3918,7 @@ def get_wyckoffs(num, organized=False, dim=3):
             if dim == 0:
                 wyckoffs[-1].append(SymmOp(y))
             else:
-                wyckoffs[-1].append(SymmOp.from_xyz_str(y))
+                wyckoffs[-1].append(SymmOp.from_xyz_string(y))
     if organized:
         wyckoffs_organized = [[]]  # 2D Array of WP's organized by multiplicity
         old = len(wyckoffs[0])
@@ -3960,6 +3932,7 @@ def get_wyckoffs(num, organized=False, dim=3):
     else:
         # Return Wyckoff positions without organization
         return wyckoffs
+
 
 def get_wyckoff_symmetry(num, dim=3):
     """
@@ -3996,7 +3969,7 @@ def get_wyckoff_symmetry(num, dim=3):
             symmetry[-1].append([])
             # Loop over ops
             for z in y:
-                op = SymmOp(z) if dim == 0 else SymmOp.from_xyz_str(z)
+                op = SymmOp(z) if dim == 0 else SymmOp.from_xyz_string(z)
                 symmetry[-1][-1].append(op)
     return symmetry
 
@@ -4036,7 +4009,7 @@ def get_generators(num, dim=3):
         generators.append([])
         # Loop over ops
         for y in x:
-            op = SymmOp.from_xyz_str(y) if dim > 0 else SymmOp(y)
+            op = SymmOp.from_xyz_string(y) if dim > 0 else SymmOp(y)
             generators[-1].append(op)
     return generators
 
@@ -4075,8 +4048,7 @@ def site_symm(point, gen_pos, tol=1e-3, lattice=None, PBC=None):
         PBC = gen_pos.PBC if type(gen_pos) == Wyckoff_position else [1, 1, 1]
     # Convert point into a SymmOp
     if type(point) != SymmOp:
-        point = SymmOp.from_rotation_and_translation(
-            [[0, 0, 0], [0, 0, 0], [0, 0, 0]], np.array(point))
+        point = SymmOp.from_rotation_and_translation([[0, 0, 0], [0, 0, 0], [0, 0, 0]], np.array(point))
     symmetry = []
     for op in gen_pos:
         is_symmetry = True
@@ -4101,8 +4073,7 @@ def site_symm(point, gen_pos, tol=1e-3, lattice=None, PBC=None):
             (-z,x+1/2,-y+1/2) and (y+1/2,-z+1/2,-x), respectively, just shifted
             by (+1,-1,0) and (0,0,+1), respectively.
             """
-            el = SymmOp.from_rotation_and_translation(
-                op.rotation_matrix, op.translation_vector - np.rint(displacement))
+            el = SymmOp.from_rotation_and_translation(op.rotation_matrix, op.translation_vector - np.rint(displacement))
             symmetry.append(el)
     return symmetry
 
@@ -4150,8 +4121,7 @@ def check_wyckoff_position(points, group, tol=1e-3):
                 continue
             # Calculate distances between original and generated points
             pw = np.array([op.operate(p) for op in wp])
-            dw = distance_matrix(points, pw, None, PBC=PBC,
-                                 metric="sqeuclidean")
+            dw = distance_matrix(points, pw, None, PBC=PBC, metric="sqeuclidean")
 
             # Check each row for a zero
             for row in dw:
@@ -4293,8 +4263,7 @@ def get_pbc_and_lattice(number, dim):
         PBC = [0, 0, 0]
         # "C1", "Ci", "D2", "D2h", "T", "Th",
         # "O", "Td", "Oh", "I", "Ih",
-        lattice_type = "spherical" if number in [
-            1, 2, 6, 8, 28, 29, 30, 31, 32, 55, 56] else "ellipsoidal"
+        lattice_type = "spherical" if number in [1, 2, 6, 8, 28, 29, 30, 31, 32, 55, 56] else "ellipsoidal"
     return PBC, lattice_type
 
 
@@ -4603,8 +4572,7 @@ def abc2matrix(abc):
         # build the translation vector
         for m in re_trans.finditer(tok):
             factor = -1 if m.group(1) == "-" else 1
-            num = float(m.group(2)) / float(m.group(3)
-                                            ) if m.group(3) != "" else float(m.group(2))
+            num = float(m.group(2)) / float(m.group(3)) if m.group(3) != "" else float(m.group(2))
             trans[i] = num * factor
     return (rot_matrix, trans)
 
@@ -4620,7 +4588,7 @@ def get_symmetry_from_ops(ops, tol=1e-5):
     from spglib import get_hall_number_from_symmetry
 
     if isinstance(ops[0], str):
-        ops = [SymmOp.from_xyz_str(op) for op in ops]
+        ops = [SymmOp.from_xyz_string(op) for op in ops]
     rot = [op.rotation_matrix for op in ops]
     tran = [op.translation_vector for op in ops]
     hall_number = get_hall_number_from_symmetry(rot, tran, tol)
@@ -4701,8 +4669,7 @@ def trim_ops(ops):
                     base.append(_base)
                     tran[i] = 0
                 else:
-                    coef = next(tmp[j] / b[j]
-                                for j in range(3) if abs(b[j]) > 0)
+                    coef = next(tmp[j] / b[j] for j in range(3) if abs(b[j]) > 0)
                     tran[i] -= coef * b[3]
         return tran
 

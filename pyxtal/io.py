@@ -17,7 +17,8 @@ from pyxtal.symmetry import Group
 from pyxtal.util import get_symmetrized_pmg
 from pyxtal.wyckoff_site import atom_site, mol_site
 
-with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "bonds.json") as path:
+# with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "bonds.json") as path:
+with importlib.resources.path("pyxtal.database", "bonds.json") as path:
     bonds = loadfn(path)
 
 
@@ -95,7 +96,7 @@ def get_cif_str_for_pyxtal(struc, header: str = "", sym_num=None, style: str = "
     lines += " _symmetry_equiv_pos_as_xyz\n"
 
     for i, op in enumerate(G1):
-        lines += f"{i + 1:d} '{op.as_xyz_str():s}'\n"
+        lines += f"{i + 1:d} '{op.as_xyz_string():s}'\n"
 
     lines += "\nloop_\n"
     lines += " _atom_site_label\n"
@@ -540,7 +541,7 @@ def search_molecules_in_crystal(struc, tol=0.2, once=False, ignore_HH=True, max_
                                 sites_add.append(site1)
                                 ids_add.append(site1.index)
                         else:
-                            if d < bonds.get(key,max_bond_length):
+                            if d < bonds.get(key, max_bond_length):
                                 if pbc:
                                     site1.frac_coords += image
                                 sites_add.append(site1)

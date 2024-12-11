@@ -16,7 +16,8 @@ data = {
     # "MPWO": 225,
 }
 
-with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+# with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+with importlib.resources.path("pyxtal.database", "cifs") as path:
     cif_path = path
 
 for cif in data:

@@ -12,9 +12,10 @@ from scipy.interpolate import interp1d
 
 from pyxtal.database.element import Element
 
-with importlib.resources.as_file(
-    importlib.resources.files("pyxtal") / "database" / "atomic_scattering_params.json"
-) as path:
+# with importlib.resources.as_file(
+#     importlib.resources.files("pyxtal") / "database" / "atomic_scattering_params.json"
+# ) as path:
+with importlib.resources.path("pyxtal.database", "atomic_scattering_params.json") as path:
     ATOMIC_SCATTERING_PARAMS = loadfn(path)
 
 

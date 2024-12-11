@@ -69,10 +69,7 @@ class Lattice:
         self.kwargs = {}
         self.random = True
 
-        if isinstance(random_state, Generator):
-            self.random_state = random_state.spawn(1)[0]
-        else:
-            self.random_state = np.random.default_rng(random_state)
+        self.random_state = np.random.default_rng(random_state)
 
         # Set optional values
         self.allow_volume_reset = True
@@ -167,11 +164,16 @@ class Lattice:
         get the number of degree of freedom
         """
         if self.ltype in ["triclinic"]:
-            self.bounds = [(min_vec, max_vec), (min_vec, max_vec), (min_vec, max_vec),
-                           (min_ang, max_ang), (min_ang, max_ang), (min_ang, max_ang)]
+            self.bounds = [
+                (min_vec, max_vec),
+                (min_vec, max_vec),
+                (min_vec, max_vec),
+                (min_ang, max_ang),
+                (min_ang, max_ang),
+                (min_ang, max_ang),
+            ]
         elif self.ltype in ["monoclinic"]:
-            self.bounds = [(min_vec, max_vec), (min_vec, max_vec), (min_vec, max_vec),
-                           (min_ang, max_ang)]
+            self.bounds = [(min_vec, max_vec), (min_vec, max_vec), (min_vec, max_vec), (min_ang, max_ang)]
         elif self.ltype in ["orthorhombic"]:
             self.bounds = [(min_vec, max_vec), (min_vec, max_vec), (min_vec, max_vec)]
         elif self.ltype in ["tetragonal", "hexagonal", "trigonal"]:
@@ -552,7 +554,7 @@ class Lattice:
         if matrix is not None:
             self.set_matrix(matrix)
         else:
-            msg = f'error input {v} in update_from_1d_representation {self.ltype}'
+            msg = f"error input {v} in update_from_1d_representation {self.ltype}"
             raise ValueError(msg)
 
     def mutate(self, degree=0.10, frozen=False):
@@ -1217,10 +1219,7 @@ def generate_cellpara(
         a 6-length array representing the lattice of the unit cell. If
         generation fails, outputs a warning message and returns empty
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     min_special = kwargs.get("min_special", min_special)  # ; print("min_special", min_special)
     maxangle = np.pi - minangle
@@ -1952,10 +1951,7 @@ def gaussian_random_variable(min, max, sigma=3.0, random_state: None | int | Gen
     Returns:
         a value chosen randomly between min and max
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     center = (max + min) * 0.5
     delta = np.fabs(max - min) * 0.5
@@ -1982,10 +1978,7 @@ def random_vector(minvec=None, maxvec=None, width=0.35, unit=False, random_state
     Returns:
         a 1x3 numpy array of floats
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     # TODO these were not used in the original code, moved out of the defaults
     # and declared if None to avoid having lists as default arguments.
@@ -2014,10 +2007,7 @@ def random_shear_matrix(width=1.0, unitary=False, random_state: None | int | Gen
     Returns:
         a 3x3 numpy array of floats
     """
-    if isinstance(random_state, Generator):
-        random_state = random_state.spawn(1)[0]
-    else:
-        random_state = np.random.default_rng(random_state)
+    random_state = np.random.default_rng(random_state)
 
     mat = np.zeros([3, 3])
     determinant = 0

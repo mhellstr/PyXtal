@@ -588,7 +588,8 @@ if __name__ == "__main__":
 
     from pyxtal import pyxtal
 
-    with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+    # with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "cifs") as path:
+    with importlib.resources.path("pyxtal.database", "cifs") as path:
         cif_path = path
     c1 = pyxtal(molecular=True)
     for name in ["benzene", "resorcinol", "aspirin", "naphthalene"]:

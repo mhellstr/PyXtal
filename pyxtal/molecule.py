@@ -25,7 +25,8 @@ from pyxtal.operations import OperationAnalyzer, SymmOp, angle, rotate_vector
 from pyxtal.symmetry import Group
 from pyxtal.tolerance import Tol_matrix
 
-with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "bonds.json") as path:
+# with importlib.resources.as_file(importlib.resources.files("pyxtal") / "database" / "bonds.json") as path:
+with importlib.resources.path("pyxtal.database", "bonds.json") as path:
     bonds = loadfn(path)
 
 molecule_collection = Collection("molecules")
@@ -278,7 +279,7 @@ class pyxtal_molecule:
 
         mo = None
         self.smile = None
-        self.torsionlist = [] #None
+        self.torsionlist = []  # None
         self.reflect = False
         if seed is None:
             seed = 0xF00D
@@ -1204,7 +1205,7 @@ class pyxtal_molecule:
             for i, lib in enumerate(libs):
                 matrix0 = matrix * np.repeat(lib, 3, axis=0)
                 res = np.dot(ref, np.linalg.inv(matrix0))
-                dists[i] = np.sum((res - xyz[:len(ref)]) ** 2)
+                dists[i] = np.sum((res - xyz[: len(ref)]) ** 2)
                 # print(i, res)
             id = np.argmin(dists)
             matrix = matrix * np.repeat(libs[id], 3, axis=0)
@@ -1657,7 +1658,7 @@ class Orientation:
             # Parse the angle
             if angle == "random":
                 angle = (self.random_state.random() - 1) * np.pi * 2
-            #self.angle = angle
+            # self.angle = angle
 
             # Update the matrix
             r1 = Rotation.from_rotvec(angle * self.axis)
@@ -1677,7 +1678,6 @@ class Orientation:
             return matrix
         else:
             return self.matrix
-
 
     def set_axis(self):
         if self.degrees == 2:
